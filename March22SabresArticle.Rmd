@@ -1,0 +1,72 @@
+---
+title: "March 22 Sabres Article"
+author: "Ben Wagner"
+date: "4/6/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+library(stringr)
+library(readr)
+library(ggimage)
+```
+
+```{r}
+Sabres_team_data<-read.csv("C:\\Users\\littl\\OneDrive\\Documents\\Sabres_Analysis\\BUF.csv")
+shot_data_2122 <- read.csv("C:\\Users\\littl\\OneDrive\\Documents\\Sabres_Analysis\\shots_2021.csv")
+skater_data <- read.csv("C:\\Users\\littl\\OneDrive\\Documents\\Sabres_Analysis\\skaters.csv")
+team_data_2122 <- read.csv("C:\\Users\\littl\\OneDrive\\Documents\\Sabres_Analysis\\teams.csv")
+
+Sabres_in_march <- Sabres_team_data %>% 
+  filter(gameDate > 20220300)
+
+Sabres_before_march <- Sabres_team_data %>% 
+  filter(gameDate<20220300) %>% 
+  filter(season==2021)
+```
+
+
+```{r}
+marchSummary <- Sabres_in_march %>% 
+  filter(situation=='5on5') %>% 
+  summarize(name=unique(name), numGames=n(), xGoalsForPerGame=sum(xGoalsFor)/numGames, xGoalsAgainstPerGame=sum(xGoalsAgainst)/numGames, GoalsAbvExp=sum(goalsFor)-sum(xGoalsFor))
+
+beforeMarchSummary <- Sabres_before_march %>%
+  filter(situation=='5on5') %>% 
+  summarize(name= unique(name), numGames=n(), xGoalsForPerGame=sum(xGoalsFor)/numGames, xGoalsAgainstPerGame=sum(xGoalsAgainst)/numGames, GoalsAbvExp=sum(goalsFor)-sum(xGoalsFor))
+
+teamSummary <- team_data_2122 %>% 
+  filter(name!='BUF') %>% 
+  filter(situation== '5on5') %>% 
+  summarize(name, numGames=games_played, xGoalsForPerGame=xGoalsFor/games_played, xGoalsAgainstPerGame=xGoalsAgainst/games_played, GoalsAbvExp=goalsFor-xGoalsFor)
+
+# teamSummary %>% 
+#   ggplot(aes(x=GoalsAbvExp, y=xGoalsForPerGame))+
+#   geom_point()+
+#   geom_point(data = beforeMarchSummary)+
+#   geom_point(data = marchSummary)+
+#   geom_text(data = marchSummary, aes(label="BUF in March"), vjust=2.5, color='red')+
+#   geom_text(data = beforeMarchSummary, aes(label= "BUF before March"), vjust=2.5, color='blue')+
+#   geom_image(data=beforeMarchSummary, aes(image="C:\\Users\\littl\\OneDrive\\Documents\\Sabres_Analysis\\sabres logo.png"), asp= 1.75, size= 0.1)+
+#   geom_image(data=marchSummary, aes(image="C:\\Users\\littl\\OneDrive\\Documents\\Sabres_Analysis\\SabreslogoRedBlack.png"), asp= 1.75, size= 0.1)+
+#   geom_text(aes(label=name), vjust=-0.5)
+```
+
+```{r}
+team_data_2122 %>% 
+  filter(situation=='5on5') %>%
+  group_by(name) %>%
+  ggplot(aes(x=xGoalsAgainst/games_played, y=xGoalsFor/games_played)) +
+  geom_point()+
+  geom_text(aes(label=name))
+  #geom_vline(xintercept = )
+```
+
